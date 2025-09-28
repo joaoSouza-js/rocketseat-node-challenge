@@ -1,8 +1,8 @@
-import { email, z } from "zod"
+import { z } from "zod"
 import { User } from "../../../domain/entities/user"
 import type { Hasher } from "../../ports/hasher"
 import type { IdGenerator } from "../../ports/id-generator"
-import type { UnitOfWork } from "../../ports/unit-of-work"
+import type { AppTxCtx, UnitOfWork } from "../../ports/unit-of-work"
 import type { EventPublisher } from "../../ports/event-publisher"
 import type { UserRepository } from "../../../domain/repositories/iu-user-repository"
 import { EmailAlreadyUsedError } from "../../../domain/errors/email-already-used.error"
@@ -28,7 +28,7 @@ export class RegisterUser {
         private readonly users: UserRepository,
         private readonly hasher: Hasher,
         private readonly ids: IdGenerator,
-        private readonly uow: UnitOfWork,
+        private readonly uow: UnitOfWork<AppTxCtx>,
         private readonly events: EventPublisher
     ) { }
 

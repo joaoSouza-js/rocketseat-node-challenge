@@ -13,11 +13,13 @@ const bodySchema = z.object({
 
 type RegisterUserBody = z.infer<typeof bodySchema>;
 
-export function makeRegisterUserHandler(deps: { registerUser: RegisterUser }) {
+export async function makeRegisterUserHandler(deps: { registerUser: RegisterUser }) {
+
     return async function registerUser(
-        request: FastifyRequest<{ Body: RegisterUserBody }>,
+        request: FastifyRequest,
         reply: FastifyReply
     ) {
+
         // 1) Parse/validate HTTP body (transport concerns)
         const parse = bodySchema.safeParse(request.body);
         if (!parse.success) {

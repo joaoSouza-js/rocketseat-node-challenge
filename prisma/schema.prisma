@@ -12,8 +12,24 @@ datasource db {
 }
 
 model User {
-  id String @id 
-  name String
-  email String
-  password String
+  id         String   @id
+  name       String
+  email      String   @unique
+  password   String
+  image_url  String?  @map("imageUrl")
+  meals      Meals[]
+  updated_at DateTime @default(now()) @map("updatedAt")
+  created_at DateTime @default(now()) @map("createdAt")
+}
+
+model Meals {
+  id          String   @id
+  name        String
+  description String
+  date        DateTime
+  is_in_diet  Boolean  @map("isInDiet")
+  created_at  DateTime @default(now()) @map("createdAt")
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  updated_at  DateTime @default(now()) @map("updatedAt")
 }
