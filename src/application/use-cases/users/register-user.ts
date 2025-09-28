@@ -8,7 +8,6 @@ import type { UserRepository } from "../../../domain/repositories/iu-user-reposi
 import { EmailAlreadyUsedError } from "../../../domain/errors/email-already-used.error"
 
 
-
 export type RegisterUserCommand = {
     name: string;
     email: string;

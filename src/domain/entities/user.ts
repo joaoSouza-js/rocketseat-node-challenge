@@ -12,8 +12,7 @@ export interface UserProps {
 }
 
 export class User {
-  private props: UserProps;
-  private constructor(props: UserProps) { this.props = props; }
+  private constructor(private props: UserProps) { }
 
   /** Factory for new users (enforces invariants) */
   static create(input: {
