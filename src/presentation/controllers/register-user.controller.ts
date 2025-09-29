@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { RegisterUser } from "../../application/use-cases/users/register-user";
 import { EmailAlreadyUsedError } from "../../domain/errors/email-already-used.error";
+import { app } from "../server";
 
 // Transport-level schema (loose; strips unknowns)
 const bodySchema = z.object({
@@ -11,7 +12,6 @@ const bodySchema = z.object({
     password: z.string().min(8),
 }).strict(); // reject unknowns at the edge (optional choice)
 
-type RegisterUserBody = z.infer<typeof bodySchema>;
 
 export async function makeRegisterUserHandler(deps: { registerUser: RegisterUser }) {
 
@@ -35,13 +35,17 @@ export async function makeRegisterUserHandler(deps: { registerUser: RegisterUser
             // 2) Call application service
             const { id } = await deps.registerUser.exec({ name, email, password });
 
-            // 3) Shape HTTP response
-            // Resource URI is a choice; adapt to your routing strategy
-            reply.header("Location", `/users/${id}`);
+            const token = app.jwt.sign({
+                id: id
+            }, {
+                expiresIn: "7d"
+            })
+
             return reply.status(201).send({
                 id,
                 name,
                 email,
+                token
             });
         } catch (err: unknown) {
             // 4) Map domain/app errors → HTTP

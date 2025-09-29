@@ -7,10 +7,12 @@ const bodySchema = z.object({
     name: z.string().min(1),
     description: z.string().min(8).max(255),
     date: z.coerce.date(),
-    isInDiet: z.boolean(),
+    isInDiet: z.coerce.boolean(),
 })
 
-export async function makeRegisterMealHandler(deps: RegisterMeal) {
+export async function makeRegisterMealHandler(deps: {
+    registerMeals: RegisterMeal
+}) {
     return async function registerMeal(
         request: FastifyRequest,
         reply: FastifyReply
@@ -19,13 +21,15 @@ export async function makeRegisterMealHandler(deps: RegisterMeal) {
 
         try {
 
-            const mealId = await deps.exec({
+            const mealId = await deps.registerMeals.exec({
                 name: meal.name,
                 date: meal.date,
                 description: meal.description,
                 isInDiet: meal.isInDiet,
-                userId: ""
+                userId: request.user.id
             });
+            reply.send({ hello: "worldd" })
+
             return reply.status(201).send({ mealId });
         }
         catch (error) {
@@ -36,6 +40,7 @@ export async function makeRegisterMealHandler(deps: RegisterMeal) {
                     issues: error.issues,
                 });
             }
+            throw error
         }
     }
 }

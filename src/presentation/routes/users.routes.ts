@@ -8,27 +8,22 @@ import { RegisterUser } from "../../application/use-cases/users/register-user";
 import { LocalEventBus } from "../../infrastructure/events/local-event-bus";
 import { makeRegisterUserHandler } from "../controllers/register-user.controller";
 
-export function userRoutes(app: FastifyInstance) {
+export async function userRoutes(app: FastifyInstance) {
     const client = prisma
 
     const hasher = new Argon2Hasher();
     const ids = new CryptoIdGenerator()
     const users = new PrismaUserRepository(client)
-    const uow = new PrismaUnitOfWork(prisma);
+    const uow = new PrismaUnitOfWork(client);
     const events = new LocalEventBus();
 
     const registerUserUC = new RegisterUser(users, hasher, ids, uow, events);
 
-    app.post("/users", async (request, reply) => {
+    app.post("/", async (request, reply) => {
         const promiseHandler = await makeRegisterUserHandler({
             registerUser: registerUserUC
         })
-
         await promiseHandler(request, reply);
 
-    })
-
-    app.get("/", (request, reply) => {
-        reply.send({ hello: "world" })
     })
 }

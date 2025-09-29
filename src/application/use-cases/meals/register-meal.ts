@@ -17,6 +17,7 @@ export class RegisterMeal {
     ) { }
 
     async exec(input: RegisterMealCommand) {
+
         const mealId = await this.uow.withTransaction(async ({ tx }) => {
             const user = await this.users.findById(input.userId, tx)
 
@@ -33,7 +34,7 @@ export class RegisterMeal {
                 userId: input.userId
             })
 
-            this.meals.create(meal, tx)
+            await this.meals.create(meal, tx)
 
             return meal.id
         })

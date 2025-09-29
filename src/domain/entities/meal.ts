@@ -32,12 +32,10 @@ export class Meal {
         updatedAt = new Date(),
         createdAt = new Date()) {
 
-        const createDate = CurrentDate.fromDate(createdAt)
-        const updateDate = CurrentDate.fromDate(updatedAt)
         const schedule = CurrentDate.fromDate(input.date)
         return new Meal({
-            createdAt: createDate.toDate(),
-            updatedAt: updateDate.toDate(),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
             date: schedule,
             description: input.description,
             id: input.id,
