@@ -10,9 +10,9 @@ import { prisma } from "../../infrastructure/db/prisma";
 export async function mealRoutes(app: FastifyInstance) {
     const client = prisma
     const mealsRepository = new PrismaMealRepository(client)
-    const IdGenerator = new CryptoIdGenerator()
     const usersRepository = new PrismaUserRepository(client)
     const uow = new PrismaUnitOfWork(client);
+    const IdGenerator = new CryptoIdGenerator()
     const registerMealUC = new RegisterMeal(mealsRepository, usersRepository, IdGenerator, uow)
 
     app.addHook("onRequest", async (request, reply) => {
