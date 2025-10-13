@@ -4,7 +4,20 @@ export interface RegisterMealCommand {
     description: string,
     isInDiet: boolean,
     date: Date,
+}
 
+export interface UpdateMealCommand {
+    mealId: string,
+    ownerId: string,
+    name?: string,
+    description?: string,
+    isInDiet?: boolean,
+    date?: Date,
+}
+
+export interface GetMealCommand {
+    ownerId: string,
+    mealId: string,
 }
 
 export interface PublicMealDTO {

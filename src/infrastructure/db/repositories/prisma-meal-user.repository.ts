@@ -85,9 +85,10 @@ export class PrismaMealRepository implements MealRepository {
         const existMeal = await client.meals.findUnique({
             where: { id: meal.id }
         });
+
         if (existMeal === null) return
 
-        client.meals.update({
+        await client.meals.update({
             where: {
                 id: meal.id
             },

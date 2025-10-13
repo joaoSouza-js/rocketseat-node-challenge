@@ -7,7 +7,7 @@ const bodySchema = z.object({
     name: z.string().min(1),
     description: z.string().min(8).max(255),
     date: z.coerce.date(),
-    isInDiet: z.coerce.boolean(),
+    isInDiet: z.coerce.boolean().default(false),
 })
 
 export async function makeRegisterMealHandler(deps: {
@@ -28,9 +28,9 @@ export async function makeRegisterMealHandler(deps: {
                 isInDiet: meal.isInDiet,
                 userId: request.user.id
             });
-            reply.send({ hello: "worldd" })
 
-            return reply.status(201).send({ mealId });
+
+            return reply.status(201).send({ id: mealId });
         }
         catch (error) {
             if (isZodError(error)) {

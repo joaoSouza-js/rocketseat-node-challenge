@@ -21,8 +21,8 @@ export class RegisterMeal {
         const mealId = await this.uow.withTransaction(async ({ tx }) => {
             const user = await this.users.findById(input.userId, tx)
 
-            if (!user) {
-                throw new UserNotFoundError('User not found')
+            if (user === null) {
+                throw new UserNotFoundError(input.userId)
             }
 
             const meal = Meal.create({
