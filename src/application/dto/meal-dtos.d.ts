@@ -24,6 +24,11 @@ export interface GetMealsCommand {
     ownerId: string,
 }
 
+export interface GetMealsSummaryCommand {
+    ownerId: string,
+}
+
+
 export interface DeleteMealCommand {
     ownerId: string,
     mealId: string
@@ -36,4 +41,11 @@ export interface PublicMealDTO {
     date: Date;
     ownerId?: string;
     isInDiet: boolean;
+}
+
+export interface PublicMealsSummaryDTO {
+    bestSequence: number,
+    mealsAmount: number,
+    mealOutDiet: number,
+    mealInDiet: number,
 }

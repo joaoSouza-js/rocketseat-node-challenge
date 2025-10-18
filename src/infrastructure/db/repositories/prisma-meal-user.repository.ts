@@ -3,6 +3,7 @@ import { MealRepository } from "../../../domain/repositories/iu-meal-repository"
 import { PrismaClient } from "../../../../generated/prisma";
 import { Meal } from "../../../domain/entities/meal";
 import { CurrentDate } from "../../../domain/value-objects/current-date";
+import { MealSummary } from "../../../domain/value-objects/meal-summary";
 
 
 type DbClient = Pick<PrismaClient, "meals">
@@ -137,6 +138,40 @@ export class PrismaMealRepository implements MealRepository {
             }
         })
         return null
+
+    }
+
+    async mealSummary(ownerId: string, tx: unknown): Promise<MealSummary> {
+
+        const client = this.getClient(tx)
+        const mealsFound = await client.meals.findMany({
+            where: {
+                userId: ownerId
+            },
+            orderBy: {
+                created_at: "asc"
+            }
+        })
+
+        const meals = mealsFound.map(meal => {
+            const mealClass = Meal.rehydrate({
+                createdAt: meal.created_at,
+                date: CurrentDate.fromDate(meal.date),
+                description: meal.description,
+                id: meal.id,
+                isInDiet: meal.is_in_diet,
+                name: meal.name,
+                updatedAt: meal.updated_at,
+                userId: meal.userId
+            })
+
+            return mealClass
+        })
+
+        const mealSummary = MealSummary.create(meals)
+
+        return mealSummary
+
 
     }
 

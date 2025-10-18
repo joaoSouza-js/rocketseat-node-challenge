@@ -14,6 +14,8 @@ import { DeleteMeal } from "../../application/use-cases/meals/delete-meal";
 import { GetMeals } from "../../application/use-cases/meals/get-meals";
 import { makeDeleteMealHandler } from "../controllers/delete-meal.controller";
 import { makeGetMealsHandler } from "../controllers/get-meals.controller";
+import { GetMealsSummary } from "../../application/use-cases/meals/meals-summary";
+import { makeGetMealsSummaryHandler } from "../controllers/get-meals.summary.controller";
 
 export async function mealRoutes(app: FastifyInstance) {
     const client = prisma
@@ -26,6 +28,7 @@ export async function mealRoutes(app: FastifyInstance) {
     const updateMealUc = new UpdateMeal(mealsRepository, usersRepository, uow)
     const deleteMealsUc = new DeleteMeal(mealsRepository, usersRepository, uow)
     const getMealsUc = new GetMeals(mealsRepository, usersRepository, uow)
+    const getMealSummaryUc = new GetMealsSummary(mealsRepository, usersRepository, uow)
 
     app.addHook("onRequest", async (request, reply) => {
         try {
@@ -45,6 +48,14 @@ export async function mealRoutes(app: FastifyInstance) {
     app.get("/", async (request, reply) => {
         const handler = await makeGetMealsHandler({
             getMeals: getMealsUc
+        })
+
+        await handler(request, reply)
+    })
+
+    app.get("/summary", async (request, reply) => {
+        const handler = await makeGetMealsSummaryHandler({
+            getMealsSummary: getMealSummaryUc
         })
 
         await handler(request, reply)
