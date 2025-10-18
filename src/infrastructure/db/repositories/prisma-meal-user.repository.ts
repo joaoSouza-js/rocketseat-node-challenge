@@ -102,5 +102,42 @@ export class PrismaMealRepository implements MealRepository {
         })
     }
 
+    async findUserMeal(ownerId: string, mealId: string, tx: unknown): Promise<Meal | null> {
+        const client = this.getClient(tx)
+        const mealFound = await client.meals.findUnique({
+            where: {
+                id: mealId,
+                userId: ownerId
+            }
+        })
+
+        if (mealFound === null) return null
+
+        const mealSchedule = CurrentDate.fromDate(mealFound.date)
+        const meal = Meal.rehydrate({
+            createdAt: mealFound.created_at,
+            date: mealSchedule,
+            description: mealFound.description,
+            id: mealFound.id,
+            isInDiet: mealFound.is_in_diet,
+            name: mealFound.name,
+            updatedAt: mealFound.updated_at,
+            userId: mealFound.userId
+        })
+
+        return meal
+
+    }
+
+    async deleteMeal(mealId: string, tx: unknown): Promise<null> {
+        const client = this.getClient(tx)
+        await client.meals.delete({
+            where: {
+                id: mealId
+            }
+        })
+        return null
+
+    }
 
 }

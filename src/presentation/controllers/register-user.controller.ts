@@ -1,8 +1,6 @@
-// src/interface/http/users/register-user.controller.ts
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { RegisterUser } from "../../application/use-cases/users/register-user";
-import { EmailAlreadyUsedError } from "../../domain/errors/email-already-used.error";
 import { app } from "../server";
 
 // Transport-level schema (loose; strips unknowns)
@@ -31,53 +29,20 @@ export async function makeRegisterUserHandler(deps: { registerUser: RegisterUser
         }
         const { name, email, password } = parse.data;
 
-        try {
-            // 2) Call application service
-            const { id } = await deps.registerUser.exec({ name, email, password });
+        const { id } = await deps.registerUser.exec({ name, email, password });
 
-            const token = app.jwt.sign({
-                id: id
-            }, {
-                expiresIn: "7d"
-            })
+        const token = app.jwt.sign({
+            id: id
+        }, {
+            expiresIn: "7d"
+        })
 
-            return reply.status(201).send({
-                id,
-                name,
-                email,
-                token
-            });
-        } catch (err: unknown) {
-            // 4) Map domain/app errors → HTTP
-            if (err instanceof EmailAlreadyUsedError) {
-                return reply.status(409).send({
-                    error: "Conflict",
-                    message: err.message,
-                });
-            }
-
-            // Zod from app layer?
-            if (isZodError(err)) {
-                return reply.status(422).send({
-                    error: "UnprocessableEntity",
-                    message: "Command validation failed",
-                    issues: err.issues,
-                });
-            }
-
-            // Unknown/unexpected → 500, but avoid leaking internals
-            request.log?.error({ err }, "registerUser failed");
-            return reply.status(500).send({
-                error: "InternalServerError",
-                message: "Unexpected error",
-            });
-        }
+        return reply.status(201).send({
+            id,
+            name,
+            email,
+            token
+        });
     };
 }
-
-// Small type guard so we don’t import Zod types in many places
-function isZodError(e: any): e is { issues: unknown } {
-    return e && typeof e === "object" && Array.isArray(e.issues);
-}
-
 

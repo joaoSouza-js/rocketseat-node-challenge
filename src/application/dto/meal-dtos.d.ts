@@ -20,6 +20,15 @@ export interface GetMealCommand {
     mealId: string,
 }
 
+export interface GetMealsCommand {
+    ownerId: string,
+}
+
+export interface DeleteMealCommand {
+    ownerId: string,
+    mealId: string
+}
+
 export interface PublicMealDTO {
     id: string;
     name: string;

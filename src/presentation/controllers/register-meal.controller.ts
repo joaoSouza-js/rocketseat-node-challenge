@@ -2,7 +2,6 @@ import z from "zod";
 import type { RegisterMeal } from "../../application/use-cases/meals/register-meal";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
-
 const bodySchema = z.object({
     name: z.string().min(1),
     description: z.string().min(8).max(255),
@@ -19,33 +18,15 @@ export async function makeRegisterMealHandler(deps: {
     ) {
         const meal = bodySchema.parse(request.body);
 
-        try {
+        const mealId = await deps.registerMeals.exec({
+            name: meal.name,
+            date: meal.date,
+            description: meal.description,
+            isInDiet: meal.isInDiet,
+            userId: request.user.id
+        });
 
-            const mealId = await deps.registerMeals.exec({
-                name: meal.name,
-                date: meal.date,
-                description: meal.description,
-                isInDiet: meal.isInDiet,
-                userId: request.user.id
-            });
-
-
-            return reply.status(201).send({ id: mealId });
-        }
-        catch (error) {
-            if (isZodError(error)) {
-                return reply.status(422).send({
-                    error: "UnprocessableEntity",
-                    message: "Command validation failed",
-                    issues: error.issues,
-                });
-            }
-            throw error
-        }
+        return reply.status(201).send({ id: mealId });
     }
 }
 
-
-function isZodError(e: any): e is { issues: unknown } {
-    return e && typeof e === "object" && Array.isArray(e.issues);
-}

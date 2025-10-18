@@ -10,6 +10,10 @@ import { GetMeal } from "../../application/use-cases/meals/get-meal";
 import { UpdateMeal } from "../../application/use-cases/meals/update-meal";
 import { makeGetMealHandler } from "../controllers/get-meal.controller";
 import { makeUpdateMealHandler } from "../controllers/update-meal.controller";
+import { DeleteMeal } from "../../application/use-cases/meals/delete-meal";
+import { GetMeals } from "../../application/use-cases/meals/get-meals";
+import { makeDeleteMealHandler } from "../controllers/delete-meal.controller";
+import { makeGetMealsHandler } from "../controllers/get-meals.controller";
 
 export async function mealRoutes(app: FastifyInstance) {
     const client = prisma
@@ -20,6 +24,8 @@ export async function mealRoutes(app: FastifyInstance) {
     const registerMealUC = new RegisterMeal(mealsRepository, usersRepository, IdGenerator, uow)
     const getMealUc = new GetMeal(mealsRepository, usersRepository, uow)
     const updateMealUc = new UpdateMeal(mealsRepository, usersRepository, uow)
+    const deleteMealsUc = new DeleteMeal(mealsRepository, usersRepository, uow)
+    const getMealsUc = new GetMeals(mealsRepository, usersRepository, uow)
 
     app.addHook("onRequest", async (request, reply) => {
         try {
@@ -36,6 +42,15 @@ export async function mealRoutes(app: FastifyInstance) {
         await handler(request, reply)
     })
 
+    app.get("/", async (request, reply) => {
+        const handler = await makeGetMealsHandler({
+            getMeals: getMealsUc
+        })
+
+        await handler(request, reply)
+    })
+
+
     app.get("/:id", async (request, reply) => {
         const handler = await makeGetMealHandler({
             getMeal: getMealUc
@@ -44,9 +59,17 @@ export async function mealRoutes(app: FastifyInstance) {
         await handler(request, reply)
     })
 
+
     app.put("/:id", async (request, reply) => {
         const handler = await makeUpdateMealHandler({
             updateMeal: updateMealUc
+        })
+        await handler(request, reply)
+    })
+
+    app.delete("/:id", async (request, reply) => {
+        const handler = await makeDeleteMealHandler({
+            deleteMeal: deleteMealsUc,
         })
         await handler(request, reply)
     })

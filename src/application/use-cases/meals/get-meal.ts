@@ -21,14 +21,10 @@ export class GetMeal {
                 throw new UserNotFoundError(input.ownerId)
             }
 
-            const mealExist = await this.meals.findMeal(input.mealId, tx)
+            const mealExist = await this.meals.findUserMeal(input.ownerId, input.mealId, tx)
 
             if (mealExist === null) {
                 throw new MealNotFoundError(input.mealId)
-            }
-
-            if (mealExist.ownerId !== input.ownerId) {
-                throw new MealWrongOwner(input.mealId)
             }
 
             const meal: PublicMealDTO = {
