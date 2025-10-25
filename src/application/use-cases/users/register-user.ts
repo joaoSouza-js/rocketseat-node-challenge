@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { User } from "../../../domain/entities/user"
 import type { Hasher } from "../../ports/hasher"
 import type { IdGenerator } from "../../ports/id-generator"
@@ -15,14 +14,8 @@ export type RegisterUserCommand = {
 };
 
 
-
-const cmdSchema = z.object({
-    name: z.string().trim().min(1),
-    email: z.string(),
-    password: z.string().min(8),
-});
-
 export class RegisterUser {
+
     constructor(
         private readonly users: UserRepository,
         private readonly hasher: Hasher,
@@ -32,21 +25,21 @@ export class RegisterUser {
     ) { }
 
     async exec(input: RegisterUserCommand): Promise<{ id: string }> {
-        const cmd = cmdSchema.parse(input);
+
 
         return this.uow.withTransaction(async ({ tx }) => {
-            const existing = await this.users.findByEmail(cmd.email, tx);
+            const existing = await this.users.findByEmail(input.email, tx);
             if (existing) {
-                throw new EmailAlreadyUsedError(cmd.email);
+                throw new EmailAlreadyUsedError(input.email);
             }
 
             const id = this.ids.next();
-            const passwordHash = await this.hasher.hash(cmd.password);
+            const passwordHash = await this.hasher.hash(input.password);
 
             const user = User.create({
                 id,
-                email: cmd.email,
-                name: cmd.name,
+                email: input.email,
+                name: input.name,
                 passwordHash,
             });
 
