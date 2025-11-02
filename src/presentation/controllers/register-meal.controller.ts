@@ -1,13 +1,6 @@
-import z from "zod";
 import type { RegisterMeal } from "../../application/use-cases/meals/register-meal";
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-const bodySchema = z.object({
-    name: z.string().min(1),
-    description: z.string().min(8).max(255),
-    date: z.coerce.date(),
-    isInDiet: z.coerce.boolean().default(false),
-})
+import { RegisterMealBody } from "../schemas/register-meal.http.schema";
 
 export async function makeRegisterMealHandler(deps: {
     registerMeals: RegisterMeal
@@ -16,7 +9,7 @@ export async function makeRegisterMealHandler(deps: {
         request: FastifyRequest,
         reply: FastifyReply
     ) {
-        const meal = bodySchema.parse(request.body);
+        const meal = request.body as RegisterMealBody
 
         const mealId = await deps.registerMeals.exec({
             name: meal.name,

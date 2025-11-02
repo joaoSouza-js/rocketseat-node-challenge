@@ -1,4 +1,3 @@
-import z from "zod";
 import type { GetMeals } from "../../application/use-cases/meals/get-meals";
 import type { FastifyReply, FastifyRequest } from "fastify";
 

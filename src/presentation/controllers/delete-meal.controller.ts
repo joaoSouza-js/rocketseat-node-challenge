@@ -1,24 +1,18 @@
-import z from "zod"
-import { DeleteMeal } from "../../application/use-cases/meals/delete-meal"
+import { DeleteMeal } from "../../application/use-cases/meals/delete-meal";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { DeleteMealQueryParams } from "../schemas/delete-meal.http.schema";
 
-const queryParamsSchema = z.object({
-    id: z.string()
-})
-
-
-export async function makeDeleteMealHandler(deps: {
-    deleteMeal: DeleteMeal
-}) {
-    return async function controller(request: FastifyRequest, reply: FastifyReply) {
-
-        const { id } = queryParamsSchema.parse(request.params)
-        const userId = request.user.id
+export async function makeDeleteMealHandler(deps: { deleteMeal: DeleteMeal }) {
+    return async function controller(
+        request: FastifyRequest,
+        reply: FastifyReply
+    ) {
+        const { id } = request.params as DeleteMealQueryParams;
+        const userId = request.user.id;
         await deps.deleteMeal.exec({
             mealId: id,
-            ownerId: userId
-        })
-        reply.send()
-
-    }
+            ownerId: userId,
+        });
+        reply.send();
+    };
 }

@@ -12,7 +12,32 @@ export class GetMeals {
     ) { }
 
     async exec(input: GetMealsCommand) {
+        const meals = await this.uow.withTransaction(async ({ tx }) => {
+            const userExist = await this.users.findById(input.ownerId, tx);
 
-        return []
+            if (userExist === null) {
+                throw new UserNotFoundError(input.ownerId);
+            }
+            const mealsFounded = await this.meals.findUserMeals(
+                input.ownerId,
+                tx
+            );
+
+            const meals: PublicMealDTO[] = mealsFounded.map((meal) => {
+                const mealFormateed: PublicMealDTO = {
+                    date: meal.date,
+                    description: meal.description,
+                    id: meal.id,
+                    isInDiet: meal.isInDiet,
+                    name: meal.name,
+                };
+
+                return mealFormateed;
+            });
+
+            return meals;
+        });
+
+        return meals
     }
 }

@@ -7,6 +7,11 @@ import { PrismaUnitOfWork } from "../../infrastructure/db/prisma/prisma-unit-of-
 import { RegisterUser } from "../../application/use-cases/users/register-user";
 import { LocalEventBus } from "../../infrastructure/events/local-event-bus";
 import { makeRegisterUserHandler } from "../controllers/register-user.controller";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { SignInUser } from "../../application/use-cases/users/sign-in";
+import { makeRegisterSignInHandler } from "../controllers/sign-in.controller";
+import { RegisterUserBodySchema } from "../schemas/register-user.http.schema";
+import { SignInBodySchema, SignInSuccessType } from "../schemas/sign-in-user.http.schema";
 
 export async function userRoutes(app: FastifyInstance) {
     const client = prisma
@@ -18,12 +23,35 @@ export async function userRoutes(app: FastifyInstance) {
     const events = new LocalEventBus();
 
     const registerUserUC = new RegisterUser(users, hasher, ids, uow, events);
+    const signInUc = new SignInUser(users, uow, hasher, events)
+    app.withTypeProvider<ZodTypeProvider>().post("/", {
 
-    app.post("/", async (request, reply) => {
+        schema: {
+            tags: ["users"],
+            summary: "create user",
+            body: RegisterUserBodySchema
+        }
+    }, async (request, reply) => {
         const promiseHandler = await makeRegisterUserHandler({
             registerUser: registerUserUC
         })
         await promiseHandler(request, reply);
 
+    })
+
+    app.withTypeProvider<ZodTypeProvider>().post("/sign-in", {
+        schema: {
+            tags: ["users"],
+            summary: "sign user ",
+            body: SignInBodySchema,
+            response: {
+                200: SignInSuccessType
+            }
+        }
+    }, async (request, reply) => {
+        const promiseHandler = await makeRegisterSignInHandler({
+            signUser: signInUc
+        })
+        await promiseHandler(request, reply, app);
     })
 }

@@ -1,18 +1,9 @@
 import z from "zod";
 import type { UpdateMeal } from "../../application/use-cases/meals/update-meal";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { UpdateMealBody, UpdateMealSchemaParams } from "../schemas/update-meal.http.schema";
 
-const bodySchema = z.object({
-    name: z.string().min(1).optional(),
-    description: z.string().min(8).max(255).optional(),
-    date: z.coerce.date().optional(),
-    isInDiet: z.coerce.boolean().default(false).optional()
 
-})
-
-const queryParamsSchema = z.object({
-    id: z.string()
-})
 
 export async function makeUpdateMealHandler(dependencies: {
     updateMeal: UpdateMeal
@@ -21,8 +12,8 @@ export async function makeUpdateMealHandler(dependencies: {
         request: FastifyRequest,
         reply: FastifyReply
     ) {
-        const meal = bodySchema.parse(request.body)
-        const { id } = queryParamsSchema.parse(request.params)
+        const meal = request.body as UpdateMealBody
+        const { id } = request.params as UpdateMealSchemaParams
         const userId = request.user.id
 
         await dependencies.updateMeal.exec({
